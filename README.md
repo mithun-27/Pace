@@ -15,64 +15,50 @@
 
 ## 🧠 The Problem
 
-Modern AI agents can reason, call tools, delegate tasks, and execute complex workflows.
+Modern AI agents can reason, call tools, delegate work, and run complex workflows. What they lack is a sense of **how much effort a task is worth**.
 
-But they have a fundamental problem:
-
-**They don't inherently know how much reasoning or execution is worth spending on a task.**
-
-Consider an agent asked to:
+Imagine an agent asked to:
 
 > Investigate a bug, inspect the repository, run tests, fix the issue, and explain the changes.
 
-The agent has:
+It has:
 
-- 100,000 tokens available.
-- 5 minutes of execution time.
-- A maximum of 20 tool calls.
-- Multiple models with different capabilities and costs.
+- 100,000 tokens
+- 5 minutes of execution time
+- A maximum of 20 tool calls
+- Several models with different capabilities and costs
 
-It must continuously decide:
+At every step it must decide:
 
-- Should it use a more expensive reasoning model?
-- Is another tool call worth the additional cost?
-- Should it delegate a subtask?
-- Is retrying likely to improve the result?
-- Should it continue reasoning or execute?
-- Has it reached the point where additional effort is no longer worthwhile?
-- Should it stop and report incomplete execution?
+- Is a more expensive reasoning model worth using here?
+- Is another tool call worth its cost?
+- Should this subtask be delegated?
+- Will a retry actually improve the result?
+- Should it keep reasoning or start executing?
+- Has more effort stopped paying off?
+- Should it stop and report an incomplete result?
 
-Traditional token counters and static budget limits cannot make these decisions intelligently.
-
-**Pace addresses this problem.**
+Token counters and static budget limits can't answer these questions. **Pace is built to.**
 
 ---
 
 ## 🚀 What is Pace?
 
-Pace is an experimental runtime decision controller for autonomous LLM agents.
+Pace is an experimental runtime decision controller for autonomous LLM agents. It looks at the agent's current state, remaining resources, task progress, and candidate actions, then recommends the best next step.
 
-It evaluates the agent's current execution state, available resources, expected task progress, and potential actions to determine the most appropriate next step.
+It acts as a decision layer between the agent and its execution environment, so resources are spent only where they add value.
 
-Instead of allowing an agent to consume resources without considering their value, Pace introduces an intelligent decision layer between the agent and its execution environment.
-
-Its objective is simple:
-
-**Maximize task completion quality while respecting resource constraints.**
+**Goal:** maximize task completion quality within resource constraints.
 
 ---
 
 ## 🎯 Core Philosophy
 
-An intelligent agent should not simply ask:
+A good agent shouldn't only ask, *"What should I do next?"*
 
-"What should I do next?"
+It should also ask, *"Is the next action worth what it will cost?"*
 
-It should also ask:
-
-"Is doing this next action worth the resources it will consume?"
-
-Pace aims to make this decision continuously throughout agent execution.
+Pace makes that judgment continuously throughout execution.
 
 ---
 
@@ -124,78 +110,59 @@ Pace aims to make this decision continuously throughout agent execution.
              +------------------+
                       |
                       v
-              UPDATE STATE
+                 UPDATE STATE
                       |
                       v
-               PACE DECIDES
-                AGAIN OR STOP
+          PACE DECIDES AGAIN OR STOPS
 ```
 
 ---
 
 ## ⚙️ Core Capabilities
 
-### 1. Resource-Aware Decision Making
-
-Monitor and reason about multiple resource constraints simultaneously:
-
-- Token consumption.
-- Execution time.
-- Tool-call limits.
-- Model inference costs.
-- Remaining execution budget.
+### 1. Resource-Aware Decisions
+Track and reason about several constraints at once: tokens, time, tool-call limits, model costs, and remaining budget.
 
 ### 2. Adaptive Model Selection
+Pick a model based on task needs, expected performance, latency, and cost:
 
-Choose between available models based on task requirements, expected performance, latency, and cost.
+- Lightweight models for simple steps
+- Reasoning models for hard decisions
+- Specialized models for specific subtasks
 
-For example:
-
-- Lightweight models for simple operations.
-- Reasoning models for complex decisions.
-- Specialized models for specific subtasks.
-
-### 3. Intelligent Tool-Call Management
-
-Evaluate whether another tool call is likely to provide sufficient value relative to its cost.
-
-Avoid unnecessary retries and redundant operations.
+### 3. Tool-Call Management
+Judge whether another call is worth its cost, and avoid redundant operations and pointless retries.
 
 ### 4. Delegation Decisions
-
-Determine when a task should be delegated to another agent and whether the expected benefit justifies the additional resource consumption.
+Decide when to hand a task to another agent and whether the expected benefit outweighs the added cost.
 
 ### 5. Optimal Stopping
+Decide whether to:
 
-Determine when an agent should:
-
-- Continue reasoning.
-- Execute the next action.
-- Attempt recovery.
-- Stop execution.
-- Return a partial result.
+- Continue reasoning
+- Execute the next action
+- Attempt recovery
+- Stop execution
+- Return a partial result
 
 ### 6. Dynamic Budget Allocation
-
-Redistribute available resources as task requirements and execution conditions change.
+Reallocate resources as the task and its conditions change.
 
 ---
 
 ## 🔬 Algorithms & Research Foundations
 
-Pace explores several optimization and decision-making techniques.
-
 | Algorithm | Purpose |
 |---|---|
-| Multi-Armed Bandits | Learn which execution strategies perform better |
-| Contextual Bandits | Select strategies based on task conditions |
+| Multi-Armed Bandits | Learn which strategies work better |
+| Contextual Bandits | Choose strategies based on task conditions |
 | Bayesian Estimation | Estimate completion probability and uncertainty |
-| Optimal Stopping | Determine when additional execution is no longer worthwhile |
-| Constrained Optimization | Make decisions under resource constraints |
-| Knapsack Optimization | Allocate limited resources across competing actions |
-| Model Predictive Control | Recalculate decisions as execution evolves |
+| Optimal Stopping | Find when more effort is no longer worth it |
+| Constrained Optimization | Make decisions under resource limits |
+| Knapsack Optimization | Split limited resources among competing actions |
+| Model Predictive Control | Recompute decisions as execution evolves |
 
-These algorithms are research foundations, not claims that every technique is already implemented.
+> These are research directions, not a claim that every technique is already implemented.
 
 ---
 
@@ -225,43 +192,37 @@ print("Estimated Cost:", decision.estimated_cost)
 print("Remaining Budget:", decision.remaining_budget)
 ```
 
-Pace aims to provide an execution-policy interface that can integrate with different LLM agent frameworks.
+Pace aims to be an execution-policy interface that plugs into different LLM agent frameworks.
 
-*Note: This is the proposed API. Actual functionality and interfaces will evolve during development.*
+> **Note:** This is the proposed API. Interfaces and functionality will change as development continues.
 
 ---
 
 ## 📊 Evaluation Metrics
 
-Pace should be evaluated not only by how much money it saves but also by whether its decisions improve overall agent performance.
+Pace should be judged on whether its decisions improve agent performance, not only on how much it saves.
 
 | Metric | What It Measures |
 |---|---|
-| Task Success Rate | Percentage of successfully completed tasks |
-| Cost per Successful Task | Resource expenditure per successful completion |
-| Deadline Violation Rate | Percentage of tasks exceeding time limits |
-| Budget Calibration | Accuracy of resource consumption estimates |
-| Decision Regret | Difference between selected and optimal decisions |
-| Quality vs. Expenditure | Task quality relative to consumed resources |
-| Unnecessary Action Rate | Frequency of low-value execution decisions |
+| Task Success Rate | Share of tasks completed successfully |
+| Cost per Successful Task | Resources spent per success |
+| Deadline Violation Rate | Share of tasks that overrun time limits |
+| Budget Calibration | Accuracy of resource-use estimates |
+| Decision Regret | Gap between chosen and optimal decisions |
+| Quality vs. Expenditure | Output quality relative to resources used |
+| Unnecessary Action Rate | Frequency of low-value actions |
 
-### Research Objective
-
-Compare different execution policies under identical resource constraints.
-
-The goal is to determine whether adaptive decision-making can outperform static execution strategies.
+**Research objective:** compare execution policies under identical resource constraints, and test whether adaptive decision-making beats static strategies.
 
 ---
 
 ## 🧪 Research Questions
 
-Pace is built around several interesting research questions:
-
-1. Can an LLM agent learn when additional reasoning is worth its cost?
+1. Can an agent learn when extra reasoning is worth its cost?
 2. Can contextual bandits improve model and tool selection?
-3. Can Bayesian estimation predict whether an agent is likely to complete a task?
-4. Can optimal stopping prevent unnecessary agent execution?
-5. Can dynamic resource allocation improve task success under fixed budgets?
+3. Can Bayesian estimation predict whether an agent will finish a task?
+4. Can optimal stopping prevent unnecessary execution?
+5. Can dynamic allocation raise success rates under fixed budgets?
 6. Can a runtime controller outperform static token and time limits?
 
 ---
@@ -280,106 +241,86 @@ Pace is built around several interesting research questions:
 | Testing | pytest |
 | Documentation | MkDocs |
 
-The final implementation may use a smaller subset depending on the architecture.
+The final implementation may use a smaller subset.
 
 ---
 
 ## 🗺️ Roadmap
 
 ### Phase 1 — Core Runtime
-
-- [ ] Design the Pace runtime architecture.
-- [ ] Implement resource tracking.
-- [ ] Implement token, time, and tool-call budgets.
-- [ ] Define agent execution states.
-- [ ] Design the decision interface.
+- [ ] Design the runtime architecture
+- [ ] Implement resource tracking
+- [ ] Implement token, time, and tool-call budgets
+- [ ] Define agent execution states
+- [ ] Design the decision interface
 
 ### Phase 2 — Decision Engine
-
-- [ ] Implement contextual decision policies.
-- [ ] Add Bayesian completion estimation.
-- [ ] Implement optimal stopping.
-- [ ] Implement constrained resource allocation.
-- [ ] Add adaptive model selection.
+- [ ] Implement contextual decision policies
+- [ ] Add Bayesian completion estimation
+- [ ] Implement optimal stopping
+- [ ] Implement constrained resource allocation
+- [ ] Add adaptive model selection
 
 ### Phase 3 — Agent Integration
-
-- [ ] Build a framework-independent interface.
-- [ ] Integrate with LangChain.
-- [ ] Integrate with LangGraph.
-- [ ] Support custom agent implementations.
-- [ ] Add delegation and retry policies.
+- [ ] Build a framework-independent interface
+- [ ] Integrate with LangChain
+- [ ] Integrate with LangGraph
+- [ ] Support custom agent implementations
+- [ ] Add delegation and retry policies
 
 ### Phase 4 — Benchmarking & Evaluation
-
-- [ ] Create fixed-budget evaluation scenarios.
-- [ ] Compare static and adaptive policies.
-- [ ] Measure cost versus task quality.
-- [ ] Evaluate decision regret.
-- [ ] Publish reproducible experiments.
+- [ ] Create fixed-budget evaluation scenarios
+- [ ] Compare static and adaptive policies
+- [ ] Measure cost versus task quality
+- [ ] Evaluate decision regret
+- [ ] Publish reproducible experiments
 
 ### Phase 5 — Open Source Release
-
-- [ ] Publish Python package.
-- [ ] Write comprehensive documentation.
-- [ ] Provide practical examples.
-- [ ] Publish benchmark results.
-- [ ] Release the first stable version.
+- [ ] Publish the Python package
+- [ ] Write full documentation
+- [ ] Provide practical examples
+- [ ] Publish benchmark results
+- [ ] Release the first stable version
 
 ---
 
-## 🔍 Existing Research & Related Work
+## 🔍 Related Work
 
-Pace explores the intersection of:
+Pace sits at the intersection of budget-aware LLM inference, adaptive computation, agent orchestration, sequential decision-making, resource-constrained optimization, and optimal stopping theory.
 
-- Budget-aware LLM inference.
-- Adaptive computation.
-- AI agent orchestration.
-- Sequential decision-making.
-- Resource-constrained optimization.
-- Optimal stopping theory.
-
-An important related research direction is **BAGEN**, which investigates budget-aware agent execution.
-
-Pace aims to focus on a complementary engineering problem: building a reusable runtime decision controller that makes resource-allocation decisions during agent execution.
-
-The objective is not to reproduce existing benchmarks but to develop a practical decision-policy layer.
+A related research direction is **BAGEN**, which studies budget-aware agent execution. Pace focuses on a complementary engineering problem: a reusable runtime controller that makes resource decisions while the agent is running. The aim is not to reproduce existing benchmarks but to build a practical decision-policy layer.
 
 ---
 
 ## 🤝 Contributing
 
-Contributions, research discussions, algorithm improvements, and experiments are welcome.
+Contributions, research discussions, algorithm improvements, and experiments are welcome. Helpful areas include:
 
-Potential contribution areas:
-
-- Decision-making algorithms.
-- Bayesian estimation.
-- Resource allocation strategies.
-- Agent framework integrations.
-- Benchmark environments.
-- Performance evaluation.
-- Documentation and examples.
+- Decision-making algorithms
+- Bayesian estimation
+- Resource allocation strategies
+- Agent framework integrations
+- Benchmark environments
+- Performance evaluation
+- Documentation and examples
 
 ### Getting Started
 
 ```bash
 git clone https://github.com/YOUR_USERNAME/pace.git
-
 cd pace
-
 python -m venv .venv
 ```
 
 Activate the environment:
 
-**Windows:**
+**Windows**
 
 ```powershell
 .venv\Scripts\activate
 ```
 
-**Linux / macOS:**
+**Linux / macOS**
 
 ```bash
 source .venv/bin/activate
@@ -397,18 +338,15 @@ Run tests:
 pytest
 ```
 
-*Installation instructions will be finalized as the package implementation develops.*
+*Installation steps will be finalized as the implementation matures.*
 
 ---
 
 ## 🌟 Vision
 
-The future of AI agents is not just about making them more capable.
-
-It is about making them more efficient, adaptive, and responsible with the resources they consume.
+The future of AI agents is not only about making them more capable. It is about making them efficient, adaptive, and responsible with the resources they use.
 
 An agent that can solve a problem is useful.
-
 An agent that knows how much effort a problem deserves is smarter.
 
 **Pace aims to make that possible.**
